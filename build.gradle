@@ -1,8 +1,11 @@
 buildscript {
-    ext.kotlin_version = '1.2.31' // Required for Kotlin integration
-    ext.spring_boot_version = '2.0.2.RELEASE'
+    ext {
+        kotlin_version = '1.2.31' // Required for Kotlin integration
+        spring_boot_version = '2.0.2.RELEASE'
+    }
     repositories {
         jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version" // Required for Kotlin integration
@@ -16,17 +19,16 @@ apply plugin: "kotlin-spring" // See https://kotlinlang.org/docs/reference/compi
 apply plugin: 'org.springframework.boot'
 apply plugin: 'java'
 apply plugin: 'idea'
+apply plugin: 'io.spring.dependency-management'
 
 // Java target version
 sourceCompatibility = 1.8
-
-jar {
-    baseName = 'gs-rest-service'
-    version = '0.1.0'
-}
+group = 'com.trackforever'
+version = '0.0.1-SNAPSHOT'
 
 repositories {
     jcenter()
+    mavenCentral()
 }
 
 test {
@@ -57,7 +59,8 @@ sourceSets {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version" // Required for Kotlin integration
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-web', version: "$spring_boot_version"
-    testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: "$spring_boot_version"
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    compile("org.jetbrains.kotlin:kotlin-reflect")
+    testCompile('org.springframework.boot:spring-boot-starter-test')
 }
