@@ -5,6 +5,13 @@ jdk:
   - oraclejdk8
 dist: trusty
 
+addons:
+  apt:
+    update: true
+
+before_install:
+  - chmod 777 ./gradlew
+
 script:
   - chmod 777 ./gradlew
   - ./gradlew build
