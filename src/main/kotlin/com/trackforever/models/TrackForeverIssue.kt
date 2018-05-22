@@ -10,7 +10,7 @@ data class TrackForeverIssue(
         val comments: Array<TrackForeverComment>,
         val submitterName: String,
         val assignees: Array<String>,
-        val timeCreated: Long,
-        val timeUpdated: Long,
-        val timeClosed: Long
+        val timeCreated: Long?,
+        val timeUpdated: Long?,
+        val timeClosed: Long?
 )
