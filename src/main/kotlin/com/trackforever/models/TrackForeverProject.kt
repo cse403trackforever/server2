@@ -13,5 +13,5 @@ data class TrackForeverProject(
         val name: String,
         val description: String,
         val source: String,
-        val issues: Map<String, TrackForeverIssue>
+        val issues: MutableMap<String, TrackForeverIssue>
 )

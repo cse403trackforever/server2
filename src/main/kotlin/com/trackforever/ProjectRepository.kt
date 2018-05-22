@@ -5,5 +5,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 
 interface ProjectRepository : MongoRepository<TrackForeverProject, String> {
     fun findByHash(hash: String): TrackForeverProject
-
 }
