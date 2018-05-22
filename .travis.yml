@@ -6,6 +6,7 @@ jdk:
 dist: trusty
 
 script:
+  - chmod 777 ./gradlew
   - ./gradlew build
   - ./gradlew test
 
