@@ -1,0 +1,5 @@
+# .coveralls.yml
+
+service name: travis-ci
+service job id: 246121223
+repo token: tWtKFLjz4TVZ4DXXCmiyUsq8MfuYRfM9I
