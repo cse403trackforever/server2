@@ -1,7 +1,8 @@
 buildscript {
     ext {
-        kotlin_version = '1.2.31' // Required for Kotlin integration
+        kotlin_version = '1.2.41' // Required for Kotlin integration
         spring_boot_version = '2.0.2.RELEASE'
+        junit_verison = '5.2.0'
     }
     repositories {
         jcenter()
@@ -59,9 +60,16 @@ sourceSets {
 }
 
 dependencies {
-    //compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile('org.springframework.boot:spring-boot-starter-web')
-    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    compile("org.jetbrains.kotlin:kotlin-reflect")
+    compile('org.jetbrains.kotlin:kotlin-stdlib-jdk8')
+    compile('org.jetbrains.kotlin:kotlin-reflect')
+    compile('com.beust:klaxon:3.0.4')
+    compile('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+
+    testCompile('org.jetbrains.kotlin:kotlin-test')
+    testCompile('org.jetbrains.kotlin:kotlin-test-junit')
     testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile("org.junit.jupiter:junit-jupiter-api:$junit_verison")
+    testRuntime("org.junit.jupiter:junit-jupiter-engine:$junit_verison")
 }
