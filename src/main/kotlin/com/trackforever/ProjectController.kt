@@ -11,24 +11,24 @@ import org.springframework.web.bind.annotation.*
 class ProjectController {
 
     @Autowired
-    lateinit var projRepo: ProjectRepository
+    lateinit var projectRepository: ProjectRepository
 
     @GetMapping("/projects")
     fun getProjects(): ResponseEntity<Array<TrackForeverProject>> {
-        val projectList = ArrayList<TrackForeverProject>(projRepo.findAll())
+        val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         val projectArray = projectList.toTypedArray()
         return if (projectList.isEmpty()) ResponseEntity(HttpStatus.GONE) else ResponseEntity(projectArray, HttpStatus.OK)
     }
 
     @GetMapping("/projects/{projectKey}")
     fun getProject(@PathVariable projectKey: String): ResponseEntity<TrackForeverProject> {
-        val specifiedProject = projRepo.findById(projectKey)
+        val specifiedProject = projectRepository.findById(projectKey)
         return if (specifiedProject.isPresent) ResponseEntity(specifiedProject.get(), HttpStatus.OK) else ResponseEntity(HttpStatus.GONE)
     }
 
     @GetMapping("/hashes")
     fun getHashes(): ResponseEntity<Map<String, String>> {
-        val projectList = ArrayList<TrackForeverProject>(projRepo.findAll())
+        val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         if (projectList.isEmpty()) return ResponseEntity(HttpStatus.GONE)
         val projectHashes: MutableMap<String, String> = mutableMapOf()
         projectList.forEach {
@@ -43,12 +43,12 @@ class ProjectController {
     @PutMapping("/issues")
     fun setIssues(@RequestBody issues: Map<String, Array<TrackForeverIssue>>): ResponseEntity<Unit> {
         issues.keys.forEach {
-            val tFProj = projRepo.findById(it)
+            val tFProj = projectRepository.findById(it)
             if (tFProj.isPresent) { // The projectKey does exist
                 issues[it]?.forEach {
                     tFProj.get().issues[it.id] = it
                 }
-                projRepo.save(tFProj.get()) // Update the entry in the database
+                projectRepository.save(tFProj.get()) // Update the entry in the database
             } else { // The projectKey doesn't exist in the database, return an error...
                 return ResponseEntity(HttpStatus.GONE)
             }
@@ -60,7 +60,7 @@ class ProjectController {
     fun setProjects(@RequestBody projects: Array<TrackForeverProject>): ResponseEntity<Unit> {
         // Add to the database
         projects.forEach {
-            projRepo.save(it)
+            projectRepository.save(it)
         }
         return ResponseEntity(HttpStatus.OK)
     }
@@ -69,7 +69,7 @@ class ProjectController {
     // TODO: Check if using Pair is okay.
     @PostMapping("/issues")
     fun getIssue(@RequestBody projectAndId: Pair<String, String>): ResponseEntity<TrackForeverIssue> {
-        val specifiedProject = projRepo.findById(projectAndId.first)
+        val specifiedProject = projectRepository.findById(projectAndId.first)
         return if (specifiedProject.isPresent) {
             val issue = specifiedProject.get().issues[projectAndId.second]
             if (issue != null) {
@@ -87,7 +87,7 @@ class ProjectController {
     fun getRequestedIssues(@RequestBody issueIds: Map<String, Array<String>>): ResponseEntity<Map<String, Array<TrackForeverIssue>>> {
         val requestedIssues: MutableMap<String, Array<TrackForeverIssue>> = mutableMapOf()
         issueIds.keys.forEach {
-            val specifiedProject = projRepo.findById(it)
+            val specifiedProject = projectRepository.findById(it)
             // Ensure project exists based on the projectKey
             if (specifiedProject.isPresent) issueIds[it]?.forEach { // Go through Array of issueIds
                 val issue = specifiedProject.get().issues[it]
@@ -108,7 +108,7 @@ class ProjectController {
     fun getRequestedProjects(@RequestBody projectIds: Array<String>): ResponseEntity<Array<TrackForeverProject>> {
         val requestedProjects: Array<TrackForeverProject> = emptyArray()
         projectIds.forEach {
-            val specifiedProject = projRepo.findById(it)
+            val specifiedProject = projectRepository.findById(it)
             if (specifiedProject.isPresent) {
                 requestedProjects[requestedProjects.size] = specifiedProject.get()
             } else {
