@@ -14,21 +14,27 @@ class ProjectController {
     lateinit var projRepo: ProjectRepository
 
     @GetMapping("/projects")
-    fun getProjects() = TrackForeverProject("", "", "", "", "", "", "", mutableMapOf())
+    fun getProjects(): ResponseEntity<Array<TrackForeverProject>> {
+        val projectList = ArrayList<TrackForeverProject>(projRepo.findAll())
+        val projectArray = projectList.toTypedArray()
+        return if (projectList.isEmpty()) ResponseEntity(HttpStatus.GONE) else ResponseEntity(projectArray, HttpStatus.OK)
+    }
 
     @GetMapping("/projects/{projectKey}")
-    fun getProject(@PathVariable projectKey: String) =
-        if (projectKey == "fakeProj")
-            TrackForeverProject("fakeProj", "", "specific project", "", "", "", "", mutableMapOf())
-        else
-            TrackForeverProject("Invalid", "", "unknown project", "", "", "", "", mutableMapOf())
+    fun getProject(@PathVariable projectKey: String): ResponseEntity<TrackForeverProject> {
+        val specifiedProject = projRepo.findById(projectKey)
+        return if (specifiedProject.isPresent) ResponseEntity(specifiedProject.get(), HttpStatus.OK) else ResponseEntity(HttpStatus.GONE)
+    }
 
     @GetMapping("/hashes")
-    fun getHashes(): MutableMap<String, String> {
-        val temp: MutableMap<String, String> = mutableMapOf()
-        temp.put("specific project", "fakeProj")
-        temp.put("unknown project", "Invalid")
-        return temp
+    fun getHashes(): ResponseEntity<Map<String, String>> {
+        val projectList = ArrayList<TrackForeverProject>(projRepo.findAll())
+        if (projectList.isEmpty()) return ResponseEntity(HttpStatus.GONE)
+        val projectHashes: MutableMap<String, String> = mutableMapOf()
+        projectList.forEach {
+            projectHashes[it.id] = it.hash
+        }
+        return ResponseEntity(projectHashes, HttpStatus.OK)
     }
 
     // TODO: Handle Array of Pairs instead of Maps. :(
