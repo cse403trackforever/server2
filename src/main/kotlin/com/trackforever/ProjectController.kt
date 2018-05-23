@@ -53,7 +53,7 @@ class ProjectController {
                 return ResponseEntity(HttpStatus.GONE)
             }
         }
-        return ResponseEntity.ok().build()
+        return ResponseEntity(HttpStatus.OK)
     }
 
     @PutMapping("/projects")
@@ -62,7 +62,7 @@ class ProjectController {
         projects.forEach {
             projRepo.save(it)
         }
-        return ResponseEntity.ok().build()
+        return ResponseEntity(HttpStatus.OK)
     }
 
     // Request Body looks like { projectKey, issueId } where both projectKey and issueId are Strings
