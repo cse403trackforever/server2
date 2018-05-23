@@ -32,13 +32,11 @@ class ProjectController {
     }
 
     // TODO: Handle Array of Pairs instead of Maps. :(
-    // TODO: Replace 404 with 410
 
     // Add or update existing issues
     @PutMapping("/issues")
     fun setIssues(@RequestBody issues: Map<String, Array<TrackForeverIssue>>): ResponseEntity<Unit> {
         issues.keys.forEach {
-            // TODO: Check if the projectKeys actually exists. If not, return a 404 to webapp.
             val tFProj = projRepo.findById(it)
             if (tFProj.isPresent) { // The projectKey does exist
                 issues[it]?.forEach {
@@ -46,7 +44,7 @@ class ProjectController {
                 }
                 projRepo.save(tFProj.get()) // Update the entry in the database
             } else { // The projectKey doesn't exist in the database, return an error...
-                return ResponseEntity.notFound().build()
+                return ResponseEntity(HttpStatus.GONE)
             }
         }
         return ResponseEntity.ok().build()
@@ -71,10 +69,10 @@ class ProjectController {
             if (issue != null) {
                 ResponseEntity(issue, HttpStatus.OK) // Return the TrackForeverIssue with an OK response
             } else {
-                ResponseEntity.notFound().build()
+                ResponseEntity(HttpStatus.GONE)
             }
         } else {
-            ResponseEntity.notFound().build()
+            ResponseEntity(HttpStatus.GONE)
         }
     }
 
@@ -93,7 +91,7 @@ class ProjectController {
                     issuesArray?.set(issuesArray.size, issue)
                 }
             } else {
-                return ResponseEntity.notFound().build()
+                return ResponseEntity(HttpStatus.GONE)
             }
         }
         return ResponseEntity(requestedIssues, HttpStatus.OK)
