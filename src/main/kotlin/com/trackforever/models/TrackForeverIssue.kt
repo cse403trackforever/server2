@@ -6,10 +6,10 @@ data class TrackForeverIssue(
         val id: String,
         val projectId: String,
         val status: String,
-        val labels: Array<String>,
-        val comments: Array<TrackForeverComment>,
+        val labels: List<String>,
+        val comments: List<TrackForeverComment>,
         val submitterName: String,
-        val assignees: Array<String>,
+        val assignees: List<String>,
         val timeCreated: Long?,
         val timeUpdated: Long?,
         val timeClosed: Long?
