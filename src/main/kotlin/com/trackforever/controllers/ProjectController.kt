@@ -77,11 +77,11 @@ class ProjectController {
         if (projectList.isEmpty()) return ResponseEntity(HttpStatus.GONE)
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
         projectList.forEach {
-            val issuesMap: MutableMap<IssueId, String> = mutableMapOf()
+            val issueHashes: MutableMap<IssueId, String> = mutableMapOf()
             it.issues.forEach {
-                issuesMap[it.key] = it.value.hash
+                issueHashes[it.key] = it.value.hash
             }
-            projectHashes[it.id] = HashResponse(it.hash, issuesMap)
+            projectHashes[it.id] = HashResponse(it.hash, issueHashes)
         }
         return ResponseEntity(projectHashes, HttpStatus.OK)
     }
@@ -135,10 +135,9 @@ class ProjectController {
     /**
      * Retrieves the requested issues.
      * Expects a Map containing K-V pairs such that K = projectKey and V = List of issueIds.
-     * TODO: Consistency with setIssues()
      * Possible Responses: HTTP 200 OK with a Map where K-V pairs such that K = projectKey and V = List of issues
      *                     HTTP 207 MULTI_STATUS with a Map of K-V pairs such that K = projectKey and V = List of issues successfully retrieved
-     *                     A 207 occurs when either a project or an issue failed to retrieve.
+     *                     A 207 occurs when either a single project or an issue failed to retrieve.
      *                     HTTP 410 GONE if none of the projects or issues could be found
      */
     @PostMapping("/issues")
