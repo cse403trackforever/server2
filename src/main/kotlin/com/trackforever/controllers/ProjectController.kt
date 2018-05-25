@@ -25,11 +25,12 @@ class ProjectController {
      * Possible Responses: HTTP 200 OK with a List of all projects.
      *                     HTTP 410 GONE if no projects exist in the database.
      */
+    @CrossOrigin
     @GetMapping("/projects")
     fun getProjects(): ResponseEntity<List<TrackForeverProject>> {
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         return when {
-            projectList.isEmpty() -> ResponseEntity(HttpStatus.GONE)
+            projectList.isEmpty() -> ResponseEntity(projectList, HttpStatus.OK)
             else -> ResponseEntity(projectList, HttpStatus.OK)
         }
     }

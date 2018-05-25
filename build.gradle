@@ -72,6 +72,11 @@ sourceSets {
     test.resources.srcDirs += 'test'
 }
 
+jar {
+    baseName = 'gs-securing-web'
+    version =  '0.1.0'
+}
+
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile('org.springframework.boot:spring-boot-starter-web')
