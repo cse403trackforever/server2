@@ -1,4 +1,4 @@
-package com.trackforever
+package com.trackforever.repositories
 
 import com.trackforever.models.TrackForeverProject
 import org.springframework.data.mongodb.repository.MongoRepository
