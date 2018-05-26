@@ -40,6 +40,7 @@ class ProjectController {
      * Possible Responses: HTTP 200 OK with the specified project.
      *                     HTTP 410 GONE if the specified project does not exist.
      */
+    @CrossOrigin
     @GetMapping("/projects/{projectKey}")
     fun getProject(@PathVariable projectKey: ProjectId): ResponseEntity<TrackForeverProject> {
         val specifiedProject = projectRepository.findById(projectKey)
@@ -51,6 +52,7 @@ class ProjectController {
      * Possible Responses: HTTP 200 OK with the issue.
      *                     HTTP 410 GONE if the specified project or the specified issue doesn't exist.
      */
+    @CrossOrigin
     @GetMapping("/issues/{projectId}/{issueId}")
     fun getIssue(@PathVariable projectId: ProjectId, @PathVariable issueId: IssueId): ResponseEntity<TrackForeverIssue> {
         val specifiedProject = projectRepository.findById(projectId)
@@ -70,12 +72,12 @@ class ProjectController {
     /**
      * Retrieves a Map of all the projectIds and their hashes.
      * Possible Responses: HTTP 200 OK along with a Map containing K-V pairs such that K = projectId and V = hash
-     *                     HTTP 410 GONE if no projects exist in the database
      */
+    @CrossOrigin
     @GetMapping("/hashes")
     fun getHashes(): ResponseEntity<Map<ProjectId, HashResponse>> {
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
-        if (projectList.isEmpty()) return ResponseEntity(HttpStatus.GONE)
+        if (projectList.isEmpty()) return ResponseEntity(emptyMap(), HttpStatus.OK)
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
         projectList.forEach {
             val issueHashes: MutableMap<IssueId, String> = mutableMapOf()
@@ -93,6 +95,7 @@ class ProjectController {
      * Possible Responses: HTTP 200 OK if all projects exist
      *                     HTTP 207 MULTI_STATUS with projectKeys mapped to an List of issues that failed to be set.
      */
+    @CrossOrigin
     @PutMapping("/issues")
     fun setIssues(@RequestBody issues: Map<ProjectId, List<TrackForeverIssue>>): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
         val failedProjects: MutableMap<ProjectId, List<TrackForeverIssue>> = mutableMapOf()
@@ -124,6 +127,7 @@ class ProjectController {
      * Possible Responses: HTTP 200 OK upon completion.
      * TODO: Verify that the projects being passed in are valid
      */
+    @CrossOrigin
     @PutMapping("/projects")
     fun setProjects(@RequestBody projects: List<TrackForeverProject>): ResponseEntity<Unit> {
         // Add to the database
@@ -139,8 +143,8 @@ class ProjectController {
      * Possible Responses: HTTP 200 OK with a Map where K-V pairs such that K = projectKey and V = List of issues
      *                     HTTP 207 MULTI_STATUS with a Map of K-V pairs such that K = projectKey and V = List of issues successfully retrieved
      *                     A 207 occurs when either a single project or an issue failed to retrieve.
-     *                     HTTP 410 GONE if none of the projects or issues could be found
      */
+    @CrossOrigin
     @PostMapping("/issues")
     fun getRequestedIssues(@RequestBody issueIds: Map<ProjectId, List<IssueId>>): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
         val requestedIssues: MutableMap<String, List<TrackForeverIssue>> = mutableMapOf()
@@ -163,7 +167,6 @@ class ProjectController {
             }
         }
         return when {
-            requestedIssues.isEmpty() -> ResponseEntity(HttpStatus.GONE)
             partialFailure -> ResponseEntity(requestedIssues, HttpStatus.MULTI_STATUS)
             else -> ResponseEntity(requestedIssues, HttpStatus.OK)
         }
@@ -174,8 +177,8 @@ class ProjectController {
      * Expects an List of projectIds that are requested.
      * Possible Responses: HTTP 200 OK with a List of all requested projects.
      *                     HTTP 207 MULTI_STATUS with a List of all requested projects that were able to be retrieved.
-     *                     HTTP 410 GONE if at least one requested project does not exist.
      */
+    @CrossOrigin
     @PostMapping("/projects")
     fun getRequestedProjects(@RequestBody projectIds: List<String>): ResponseEntity<List<TrackForeverProject>> {
         val requestedProjects: MutableList<TrackForeverProject> = mutableListOf()
@@ -186,7 +189,6 @@ class ProjectController {
             }
         }
         return when {
-            requestedProjects.isEmpty() -> ResponseEntity(HttpStatus.GONE)
             requestedProjects.size != projectIds.size -> ResponseEntity(requestedProjects, HttpStatus.MULTI_STATUS)
             else -> ResponseEntity(requestedProjects, HttpStatus.OK)
         }
