@@ -2,9 +2,11 @@ package com.trackforever.controllers
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.trackforever.Application
 import com.trackforever.repositories.ProjectRepository
 import com.trackforever.models.TrackForeverIssue
 import com.trackforever.models.TrackForeverProject
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,6 +18,8 @@ typealias IssueId = String
 @RestController
 class ProjectController (@Autowired private var projectRepository: ProjectRepository) {
 
+    private val logger = LoggerFactory.getLogger(Application::class.java)
+
     data class HashResponse(val project: String, val issues: Map<IssueId, String>)
 
     /**
@@ -26,7 +30,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/projects")
     fun getProjects(): ResponseEntity<List<TrackForeverProject>> {
-        println("get projects")
+        logger.debug("get projects")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         return when {
             projectList.isEmpty() -> ResponseEntity(projectList, HttpStatus.OK)
@@ -42,8 +46,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/projects/{projectKey}")
     fun getProject(@PathVariable projectKey: ProjectId): ResponseEntity<TrackForeverProject> {
-        println("get project")
-        println(projectKey)
+        logger.debug("get project :: ($projectKey)")
         val specifiedProject = projectRepository.findById(projectKey)
         return if (specifiedProject.isPresent) ResponseEntity(specifiedProject.get(), HttpStatus.OK) else ResponseEntity(HttpStatus.GONE)
     }
@@ -56,8 +59,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/issues/{projectId}/{issueId}")
     fun getIssue(@PathVariable projectId: ProjectId, @PathVariable issueId: IssueId): ResponseEntity<TrackForeverIssue> {
-        println("get issues")
-        println("$projectId : $issueId")
+        logger.debug("get issues :: ($projectId, $issueId)")
         val specifiedProject = projectRepository.findById(projectId)
         return when {
             specifiedProject.isPresent -> {
@@ -79,7 +81,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/hashes")
     fun getHashes(): ResponseEntity<Map<ProjectId, HashResponse>> {
-        println("get hashes")
+        logger.debug("get hashes")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         if (projectList.isEmpty()) return ResponseEntity(emptyMap(), HttpStatus.OK)
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
@@ -102,8 +104,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PutMapping("/issues")
     fun setIssues(@RequestBody issues: String): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
-        println("set issues")
-        println(issues)
+        logger.debug("set issues :: ($issues)")
         val failedProjects: MutableMap<ProjectId, List<TrackForeverIssue>> = mutableMapOf()
         val mapper = jacksonObjectMapper()
         val content: Map<ProjectId, List<TrackForeverIssue>> = mapper.readValue(issues)
@@ -139,8 +140,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PutMapping("/projects")
     fun setProjects(@RequestBody projects: String): ResponseEntity<String> {
-        println("set projects")
-        println(projects)
+        logger.debug("set projects :: ($projects)")
         val mapper = jacksonObjectMapper()
         val content: List<TrackForeverProject> = mapper.readValue(projects)
         // Add to the database
@@ -160,8 +160,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PostMapping("/issues")
     fun getRequestedIssues(@RequestBody issueIds: String): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
-        println("get req issues")
-        println(issueIds)
+        logger.debug("get req issues :: ($issueIds)")
         val requestedIssues: MutableMap<String, List<TrackForeverIssue>> = mutableMapOf()
         var partialFailure = false
         val mapper = jacksonObjectMapper()
@@ -198,8 +197,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PostMapping("/projects")
     fun getRequestedProjects(@RequestBody projectIds: String): ResponseEntity<List<TrackForeverProject>> {
-        println("get req projs")
-        println(projectIds)
+        logger.debug("get req projects :: $projectIds")
         val requestedProjects: MutableList<TrackForeverProject> = mutableListOf()
         val mapper = jacksonObjectMapper()
         val content: List<String> = mapper.readValue(projectIds)
@@ -214,6 +212,5 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
             else -> ResponseEntity(requestedProjects, HttpStatus.OK)
         }
     }
-
 
 }
