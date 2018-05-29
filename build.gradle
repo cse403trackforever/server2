@@ -35,6 +35,10 @@ jacocoTestReport {
         html.enabled = true
     }
 }
+// Coveralls is dumb
+coveralls {
+    sourceDirs += ['src/main/kotlin']
+}
 
 // Java target version
 sourceCompatibility = 1.8
