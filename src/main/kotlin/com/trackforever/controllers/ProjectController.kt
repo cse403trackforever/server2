@@ -1,9 +1,7 @@
 package com.trackforever.controllers
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.trackforever.repositories.ProjectRepository
 import com.trackforever.models.TrackForeverIssue
 import com.trackforever.models.TrackForeverProject
@@ -28,6 +26,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/projects")
     fun getProjects(): ResponseEntity<List<TrackForeverProject>> {
+        println("get projects")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         return when {
             projectList.isEmpty() -> ResponseEntity(projectList, HttpStatus.OK)
@@ -43,6 +42,8 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/projects/{projectKey}")
     fun getProject(@PathVariable projectKey: ProjectId): ResponseEntity<TrackForeverProject> {
+        println("get project")
+        println(projectKey)
         val specifiedProject = projectRepository.findById(projectKey)
         return if (specifiedProject.isPresent) ResponseEntity(specifiedProject.get(), HttpStatus.OK) else ResponseEntity(HttpStatus.GONE)
     }
@@ -55,6 +56,8 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/issues/{projectId}/{issueId}")
     fun getIssue(@PathVariable projectId: ProjectId, @PathVariable issueId: IssueId): ResponseEntity<TrackForeverIssue> {
+        println("get issues")
+        println("$projectId : $issueId")
         val specifiedProject = projectRepository.findById(projectId)
         return when {
             specifiedProject.isPresent -> {
@@ -76,6 +79,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/hashes")
     fun getHashes(): ResponseEntity<Map<ProjectId, HashResponse>> {
+        println("get hashes")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         if (projectList.isEmpty()) return ResponseEntity(emptyMap(), HttpStatus.OK)
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
@@ -98,6 +102,8 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PutMapping("/issues")
     fun setIssues(@RequestBody issues: String): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
+        println("set issues")
+        println(issues)
         val failedProjects: MutableMap<ProjectId, List<TrackForeverIssue>> = mutableMapOf()
         val mapper = jacksonObjectMapper()
         val content: Map<ProjectId, List<TrackForeverIssue>> = mapper.readValue(issues)
@@ -133,6 +139,8 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PutMapping("/projects")
     fun setProjects(@RequestBody projects: String): ResponseEntity<String> {
+        println("set projects")
+        println(projects)
         val mapper = jacksonObjectMapper()
         val content: List<TrackForeverProject> = mapper.readValue(projects)
         // Add to the database
@@ -152,6 +160,8 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PostMapping("/issues")
     fun getRequestedIssues(@RequestBody issueIds: String): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
+        println("get req issues")
+        println(issueIds)
         val requestedIssues: MutableMap<String, List<TrackForeverIssue>> = mutableMapOf()
         var partialFailure = false
         val mapper = jacksonObjectMapper()
@@ -188,6 +198,8 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PostMapping("/projects")
     fun getRequestedProjects(@RequestBody projectIds: String): ResponseEntity<List<TrackForeverProject>> {
+        println("get req projs")
+        println(projectIds)
         val requestedProjects: MutableList<TrackForeverProject> = mutableListOf()
         val mapper = jacksonObjectMapper()
         val content: List<String> = mapper.readValue(projectIds)
