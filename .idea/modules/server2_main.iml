@@ -38,9 +38,11 @@
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../out/production/classes" />
     <exclude-output />
-    <content url="file://$MODULE_DIR$/../../main" />
     <content url="file://$MODULE_DIR$/../../src/main">
       <sourceFolder url="file://$MODULE_DIR$/../../src/main/kotlin" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/resources">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/resources" type="java-resource" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
