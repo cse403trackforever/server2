@@ -82,8 +82,9 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-web')
     compile('org.jetbrains.kotlin:kotlin-stdlib-jdk8')
     compile('org.jetbrains.kotlin:kotlin-reflect')
-    compile('com.beust:klaxon:3.0.4')
+//    compile('com.beust:klaxon:3.0.4')
     compile('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+    compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
 
     testCompile('org.jetbrains.kotlin:kotlin-test')
     testCompile('org.jetbrains.kotlin:kotlin-test-junit')
