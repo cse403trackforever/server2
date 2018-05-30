@@ -79,21 +79,21 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    fun testProjectFindAll() {
+    fun projectFindAllTest() {
         assert(projectRepository.findAll().size == 2) { "There should be two projects." }
         assert(projectRepository.findById("testproj1").isPresent) { "Missing testproj1" }
         assert(projectRepository.findById("testproj2").isPresent) { "Missing testproj2" }
     }
 
     @Test
-    fun testIssuesExist() {
+    fun issuesExistTest() {
         assert(projectRepository.findById("testproj1").get().issues.isEmpty()) { "testproj1 should contain 0 issues" }
         assert(projectRepository.findById("testproj2").get().issues.size == 2) { "testproj2 should contain 2 issues" }
         assert(projectRepository.findById("testproj2").get().issues["issue123comments"] != null) { "Issue: \"issue123comments\" missing from testproj2" }
     }
 
     @Test
-    fun testIssuesCorrect() {
+    fun issuesCorrectTest() {
         assert(projectRepository.findById("testproj2").get().issues["issue123"] != null) { "Issue: \"issue123\" missing from testproj2" }
         assert(projectRepository.findById("testproj2").get().issues["issue123comments"] == TrackForeverIssue(
                 "issueHash123comments",
@@ -130,19 +130,19 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    fun testCommentsExist() {
+    fun commentsExistTest() {
         assert(projectRepository.findById("testproj2").get().issues.get("issue123comments")!!.comments.size == 2) { "Issue: \"issue123comments\" should have two comments." }
     }
 
     @Test
-    fun testCommentsCorrect() {
+    fun commentsCorrectTest() {
         val issueWithComments = projectRepository.findById("testproj2").get().issues.get("issue123comments")!!
         assert(issueWithComments.comments[0] == TrackForeverComment("Will", "Why won't you fix this?")) { "Comment mismatch in issue." }
         assert(issueWithComments.comments[1] == TrackForeverComment("Not Will", "Because I said so.")) { "Comment mismatch in issue." }
     }
 
     @Test
-    fun testProjectRemoveProject() {
+    fun projectRemoveProjectTest() {
         projectRepository.deleteById("testproj1")
         assert(projectRepository.findAll().size == 1) { "Size incorrect after deletion." }
         projectRepository.deleteById("testproj2")
