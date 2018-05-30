@@ -6,6 +6,7 @@ data class TrackForeverIssue(
         val id: String,
         val projectId: String,
         val status: String,
+        val summary: String,
         val labels: List<String>,
         val comments: List<TrackForeverComment>,
         val submitterName: String,
