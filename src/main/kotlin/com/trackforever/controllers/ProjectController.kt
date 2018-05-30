@@ -161,7 +161,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @PostMapping("/issues")
     fun getRequestedIssues(@RequestBody issueIds: String): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
         logger.debug("get req issues :: ($issueIds)")
-        val requestedIssues: MutableMap<String, List<TrackForeverIssue>> = mutableMapOf()
+        val requestedIssues: MutableMap<ProjectId, MutableList<TrackForeverIssue>> = mutableMapOf()
         var partialFailure = false
         val mapper = jacksonObjectMapper()
         val content: Map<ProjectId, List<IssueId>> = mapper.readValue(issueIds)
@@ -172,13 +172,15 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
                 val issue = specifiedProject.get().issues[it]
                 if (issue != null) { // Check to make sure the retrieved issue isn't null
                     requestedIssues.putIfAbsent(issue.projectId, mutableListOf())
-                    val issuesList = requestedIssues[issue.projectId] as MutableList<TrackForeverIssue>
-                    issuesList[issuesList.size] = issue
+                    val issuesList = requestedIssues[issue.projectId]
+                    if (issuesList != null) {
+                        issuesList += issue
+                    }
                 } else {
                     partialFailure = true
                 }
             } else {
-                requestedIssues[it] = emptyList()
+                requestedIssues[it] = mutableListOf()
                 partialFailure = true
             }
         }
@@ -204,7 +206,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
         content.forEach {
             val specifiedProject = projectRepository.findById(it)
             if (specifiedProject.isPresent) {
-                requestedProjects[requestedProjects.size] = specifiedProject.get()
+                requestedProjects += specifiedProject.get()
             }
         }
         return when {
