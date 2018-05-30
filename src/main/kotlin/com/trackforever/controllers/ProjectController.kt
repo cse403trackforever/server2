@@ -202,7 +202,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
         logger.debug("get req projects :: $projectIds")
         val requestedProjects: MutableList<TrackForeverProject> = mutableListOf()
         val mapper = jacksonObjectMapper()
-        val content: List<String> = mapper.readValue(projectIds)
+        val content: List<ProjectId> = mapper.readValue(projectIds)
         content.forEach {
             val specifiedProject = projectRepository.findById(it)
             if (specifiedProject.isPresent) {
