@@ -5,13 +5,13 @@ import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection="projects")
 data class TrackForeverProject(
-        val hash: String,
-        val prevHash: String,
+        var hash: String,
+        var prevHash: String,
         @Id
-        val id: String,
-        val ownerName: String,
-        val name: String,
-        val description: String,
-        val source: String,
-        val issues: MutableMap<String, TrackForeverIssue>
+        var id: String,
+        var ownerName: String,
+        var name: String,
+        var description: String,
+        var source: String,
+        var issues: MutableMap<String, TrackForeverIssue>
 )

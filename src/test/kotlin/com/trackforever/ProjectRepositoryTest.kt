@@ -22,7 +22,8 @@ class ProjectRepositoryTest {
     @Before
     fun setup() {
         val projWithNoIssues = TrackForeverProject(
-                "1234",
+                "a681f69cd2ebbb668a82989a6f594b4c81e8107134315bd1e9c06a13e7e1f9" +
+                        "944b841a7fafe21e3a144f11fc1991981f6a2ea50447e5e7d1d3561542354b3a2f",
                 "",
                 "testproj1",
                 "Will",
@@ -32,7 +33,8 @@ class ProjectRepositoryTest {
                 mutableMapOf()
         )
         val issueNoComments = TrackForeverIssue(
-                "issueHash123",
+                "59981dd809c5acd57515bef28acd7ac8e0ce17341e2ef7c2a46fe32a09f22b" +
+                        "5334b12cdd72bc1822eac792201007c015223805ab48bfb1ef8e2dada1acf9ab21",
                 "",
                 "issue123",
                 "testproj2",
@@ -46,7 +48,8 @@ class ProjectRepositoryTest {
                 1337
         )
         val issueWithComments = TrackForeverIssue(
-                "issueHash123comments",
+                "62666e72e0335a6f6a5cd9c655411009590e62af825a062662660f201d9202" +
+                        "d973431d55016838dcf77aea079a5d6efe6940f715defb9e6da91259e5a7d7e2cc",
                 "",
                 "issue123comments",
                 "testproj2",
@@ -64,7 +67,8 @@ class ProjectRepositoryTest {
                 null
         )
         val projWithIssues = TrackForeverProject(
-                "1337",
+                "74553d277cf8bd7e57c47ef79ab1c6c75bfd465e830bd71c90d6f8117fd174" +
+                        "b007245c35b97fbe5f0bb2244eea80e397b35844c11253bff50dba379cb4f65de0",
                 "1222",
                 "testproj2",
                 "Will",
@@ -96,7 +100,8 @@ class ProjectRepositoryTest {
     fun issuesCorrectTest() {
         assert(projectRepository.findById("testproj2").get().issues["issue123"] != null) { "Issue: \"issue123\" missing from testproj2" }
         assert(projectRepository.findById("testproj2").get().issues["issue123comments"] == TrackForeverIssue(
-                "issueHash123comments",
+                "62666e72e0335a6f6a5cd9c655411009590e62af825a062662660f201d9202" +
+                        "d973431d55016838dcf77aea079a5d6efe6940f715defb9e6da91259e5a7d7e2cc",
                 "",
                 "issue123comments",
                 "testproj2",
@@ -114,7 +119,8 @@ class ProjectRepositoryTest {
                 null
         )) { "Issue: \"issue123comments\" is stored incorrectly." }
         assert(projectRepository.findById("testproj2").get().issues["issue123"] == TrackForeverIssue(
-                "issueHash123",
+                "59981dd809c5acd57515bef28acd7ac8e0ce17341e2ef7c2a46fe32a09f22b" +
+                        "5334b12cdd72bc1822eac792201007c015223805ab48bfb1ef8e2dada1acf9ab21",
                 "",
                 "issue123",
                 "testproj2",
@@ -142,7 +148,78 @@ class ProjectRepositoryTest {
     }
 
     @Test
-    fun projectRemoveProjectTest() {
+    fun findByHashTest() {
+        val testproj1 = projectRepository.findByHash("a681f69cd2ebbb668a82989a6f594b4c81e8107134315bd1e9c06a13e7e1f9" +
+                "944b841a7fafe21e3a144f11fc1991981f6a2ea50447e5e7d1d3561542354b3a2f")
+        assert(testproj1 == TrackForeverProject(
+                "a681f69cd2ebbb668a82989a6f594b4c81e8107134315bd1e9c06a13e7e1f9" +
+                        "944b841a7fafe21e3a144f11fc1991981f6a2ea50447e5e7d1d3561542354b3a2f",
+                "",
+                "testproj1",
+                "Will",
+                "Test Project 1",
+                "This is a very complex project 1.",
+                "Google Code",
+                mutableMapOf()
+        ))
+        val testproj2 = projectRepository.findByHash("74553d277cf8bd7e57c47ef79ab1c6c75bfd465e830bd71c90d6f8117fd174" +
+                "b007245c35b97fbe5f0bb2244eea80e397b35844c11253bff50dba379cb4f65de0")
+        assert(testproj2.prevHash == "1222")
+        assert(testproj2.id == "testproj2")
+        assert(testproj2.ownerName == "Will")
+        assert(testproj2.description == "This is a simple project 2.")
+        assert(testproj2.source == "GitHub")
+        assert(testproj2.issues.size == 2)
+        assert(testproj2.issues["issue123comments"] != null)
+        assert(testproj2.issues["issue123comments"] == TrackForeverIssue(
+                "62666e72e0335a6f6a5cd9c655411009590e62af825a062662660f201d9202" +
+                        "d973431d55016838dcf77aea079a5d6efe6940f715defb9e6da91259e5a7d7e2cc",
+                "",
+                "issue123comments",
+                "testproj2",
+                "wontfix",
+                "",
+                listOf("defect", "bug"),
+                listOf(
+                        TrackForeverComment("Will", "Why won't you fix this?"),
+                        TrackForeverComment("Not Will", "Because I said so.")
+                ),
+                "Will",
+                listOf(),
+                null,
+                null,
+                null
+        ))
+        assert(testproj2.issues["issue123"] != null)
+        assert(testproj2.issues["issue123"] == TrackForeverIssue(
+                "59981dd809c5acd57515bef28acd7ac8e0ce17341e2ef7c2a46fe32a09f22b" +
+                        "5334b12cdd72bc1822eac792201007c015223805ab48bfb1ef8e2dada1acf9ab21",
+                "",
+                "issue123",
+                "testproj2",
+                "fixed",
+                "", listOf("defect", "bug"),
+                listOf(),
+                "Not Will",
+                listOf("Will"),
+                1234,
+                1235,
+                1337
+        ))
+    }
+
+    @Test
+    fun deleteByHashTest() {
+        projectRepository.deleteByHash("a681f69cd2ebbb668a82989a6f594b4c81e8107134315bd1e9c06a13e7e1f9" +
+                "944b841a7fafe21e3a144f11fc1991981f6a2ea50447e5e7d1d3561542354b3a2f")
+        assert(projectRepository.findAll().size == 1)
+        projectRepository.deleteByHash("74553d277cf8bd7e57c47ef79ab1c6c75bfd465e830bd71c90d6f8117fd174" +
+                "b007245c35b97fbe5f0bb2244eea80e397b35844c11253bff50dba379cb4f65de0")
+        assert(projectRepository.findAll().size == 0)
+    }
+
+    @Test
+    fun removeProjectTest() {
         projectRepository.deleteById("testproj1")
         assert(projectRepository.findAll().size == 1) { "Size incorrect after deletion." }
         projectRepository.deleteById("testproj2")

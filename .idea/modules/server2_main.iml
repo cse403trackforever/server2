@@ -34,6 +34,14 @@
         </compilerArguments>
       </configuration>
     </facet>
+    <facet type="Spring" name="Spring">
+      <configuration />
+    </facet>
+    <facet type="web" name="Web">
+      <configuration>
+        <webroots />
+      </configuration>
+    </facet>
   </component>
   <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/../../out/production/classes" />
@@ -52,6 +60,7 @@
     <orderEntry type="library" name="Gradle: com.fasterxml.jackson.module:jackson-module-kotlin:2.9.5" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-reflect:1.2.41" level="project" />
     <orderEntry type="library" name="Gradle: de.flapdoodle.embed:de.flapdoodle.embed.mongo:2.0.3" level="project" />
+    <orderEntry type="library" name="Gradle: org.bouncycastle:bcprov-jdk15on:1.59" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter-json:2.0.2.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.springframework.boot:spring-boot-starter:2.0.2.RELEASE" level="project" />
     <orderEntry type="library" name="Gradle: org.mongodb:mongodb-driver:3.6.3" level="project" />

@@ -1,17 +1,17 @@
 package com.trackforever.models
 
 data class TrackForeverIssue(
-        val hash: String,
-        val prevHash: String,
-        val id: String,
-        val projectId: String,
-        val status: String,
-        val summary: String,
-        val labels: List<String>,
-        val comments: List<TrackForeverComment>,
-        val submitterName: String,
-        val assignees: List<String>,
-        val timeCreated: Long?,
-        val timeUpdated: Long?,
-        val timeClosed: Long?
+        var hash: String,
+        var prevHash: String,
+        var id: String,
+        var projectId: String,
+        var status: String,
+        var summary: String,
+        var labels: List<String>,
+        var comments: List<TrackForeverComment>,
+        var submitterName: String,
+        var assignees: List<String>,
+        var timeCreated: Long?,
+        var timeUpdated: Long?,
+        var timeClosed: Long?
 )

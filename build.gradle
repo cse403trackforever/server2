@@ -89,6 +89,7 @@ dependencies {
     compile('org.jetbrains.kotlin:kotlin-reflect')
     compile('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
     compile "com.fasterxml.jackson.module:jackson-module-kotlin:2.9.+"
+    compile group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.59'
 
     testCompile('org.jetbrains.kotlin:kotlin-test')
     testCompile('org.jetbrains.kotlin:kotlin-test-junit')
