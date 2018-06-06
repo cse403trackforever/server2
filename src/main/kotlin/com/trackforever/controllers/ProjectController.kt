@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.Version
 import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.trackforever.Application
-import com.trackforever.Hash
-import com.trackforever.IssueId
-import com.trackforever.ProjectId
+import com.trackforever.*
 import com.trackforever.models.TrackForeverIssue
 import com.trackforever.models.TrackForeverProject
 import com.trackforever.repositories.IssueRepository
@@ -20,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import javax.xml.ws.Response
 
 @RestController
 class ProjectController (
@@ -41,7 +37,7 @@ class ProjectController (
         Application.logger.debug("get projects")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         projectList.forEach {
-            val issues = issueRepository.findByProjectId(it.id)
+            val issues = issueRepository.findByProjectId(it.id) // TODO: Check for possible exception
             val issuesMap = issues.associateBy({ it.id }, { it }).toMutableMap()
             it.issues = issuesMap
         }
@@ -64,7 +60,7 @@ class ProjectController (
         if (!specifiedProject.isPresent) {
             return ResponseEntity(HttpStatus.GONE)
         }
-        val issues = issueRepository.findByProjectId(projectKey)
+        val issues = issueRepository.findByProjectId(projectKey) // TODO: Check for possible exception
         val project = specifiedProject.get()
         project.issues = issues.associateBy({ it.id }, { it }).toMutableMap()
         return ResponseEntity(project, HttpStatus.OK)
@@ -79,17 +75,11 @@ class ProjectController (
     @GetMapping("/issues/{projectId}/{issueId}")
     fun getIssue(@PathVariable projectId: ProjectId, @PathVariable issueId: IssueId): ResponseEntity<TrackForeverIssue> {
         Application.logger.debug("get issues :: ($projectId, $issueId)")
-        val specifiedProject = projectRepository.findById(projectId)
-        return when {
-            specifiedProject.isPresent -> {
-                val issue = specifiedProject.get().issues[issueId]
-                if (issue != null) {
-                    ResponseEntity(issue, HttpStatus.OK) // Return the TrackForeverIssue with an OK response
-                } else {
-                    ResponseEntity(HttpStatus.GONE)
-                }
-            }
-            else -> ResponseEntity(HttpStatus.GONE)
+        val issue = issueRepository.findById(IssueKey(projectId, issueId))
+        return if (issue.isPresent) {
+            ResponseEntity(issue.get(), HttpStatus.OK)
+        } else {
+            ResponseEntity(HttpStatus.GONE)
         }
     }
 
@@ -106,8 +96,9 @@ class ProjectController (
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
         projectList.forEach {
             val issueHashes: MutableMap<IssueId, Hash> = mutableMapOf()
-            it.issues.forEach {
-                issueHashes[it.key] = it.value.hash
+            val issues = issueRepository.findByProjectId(it.id) // TODO: Check for possible exception
+            issues.forEach {
+                issueHashes[it.id] = it.hash
             }
             projectHashes[it.id] = HashResponse(it.hash, issueHashes)
         }
