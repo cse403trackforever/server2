@@ -131,6 +131,32 @@ class ProjectController (
                 // Go through the given list and update those issues.
                 val givenIssues = it.value
                 givenIssues.forEach {
+                    // Get, check, save
+                    // Assumes projectId and issueId will not be able to change
+                    val serverIssue = issueRepository.findById(IssueKey(it.projectId, it.id))
+                    if (serverIssue.isPresent) { // issue exists on the server
+                        val issue = serverIssue.get()
+                        val calculatedHash = generateHash(it)
+                        if (calculatedHash != it.hash) { // Correct the hash if it's different.
+                            Application.logger.debug("Incorrect hash detected for issue: ${it.id}.")
+                            it.hash = calculatedHash
+                        }
+                        if (calculatedHash != issue.hash) { // Issue has been changed. Update
+                            it.prevHash = issue.hash // Assign old hash from server to prevHash
+                            it.hash = generateHash(it) // Regenerate issue based on prevHash
+                        }
+
+                    } else { // issue doesn't exist on the server
+                        // Check hash
+                        val calculatedHash = generateHash(it)
+                        if (calculatedHash != it.hash) { // Correct the hash if it's different.
+                            Application.logger.debug("Incorrect hash detected for issue: ${it.id}.")
+                            it.hash = calculatedHash
+                        }
+                    }
+                    issueRepository.save(it) // Update the issue
+                    successes[it.projectId]!![it.id] = it.hash
+
                     if (project.issues.containsKey(it.id)) { // Assumes IssueId never changes
                         it.prevHash = project.issues[it.id]!!.hash // Set prevHash to the one in the server
                     }
