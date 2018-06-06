@@ -7,6 +7,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.trackforever.Application
 import com.trackforever.models.TrackForeverIssue
 import com.trackforever.models.TrackForeverProject
+import com.trackforever.repositories.IssueRepository
 import com.trackforever.repositories.ProjectRepository
 import com.trackforever.serializer.TrackForeverIssueSerializer
 import com.trackforever.serializer.TrackForeverProjectSerializer
@@ -22,7 +23,10 @@ typealias IssueId = String
 typealias Hash = String
 
 @RestController
-class ProjectController (@Autowired private var projectRepository: ProjectRepository) {
+class ProjectController (
+        @Autowired private var projectRepository: ProjectRepository,
+        @Autowired private var issueRepository: IssueRepository
+) {
 
     data class HashResponse(val project: String, val issues: Map<IssueId, String>)
 
