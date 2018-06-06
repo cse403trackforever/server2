@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface IssueRepository : MongoRepository<TrackForeverIssue, String> {
-    fun findByprojectId(): List<TrackForeverIssue>
+    fun findByprojectId(projectId: String): List<TrackForeverIssue>
 }
