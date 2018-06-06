@@ -134,6 +134,7 @@ class ProjectController (
                     // Get, check, save
                     // Assumes projectId and issueId will not be able to change
                     val serverIssue = issueRepository.findById(IssueKey(it.projectId, it.id))
+                    // TODO: Some refactoring
                     if (serverIssue.isPresent) { // issue exists on the server
                         val issue = serverIssue.get()
                         val calculatedHash = generateHash(it)
@@ -145,7 +146,6 @@ class ProjectController (
                             it.prevHash = issue.hash // Assign old hash from server to prevHash
                             it.hash = generateHash(it) // Regenerate issue based on prevHash
                         }
-
                     } else { // issue doesn't exist on the server
                         // Check hash
                         val calculatedHash = generateHash(it)

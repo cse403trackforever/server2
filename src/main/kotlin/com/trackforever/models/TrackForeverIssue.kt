@@ -13,8 +13,8 @@ data class TrackForeverIssue(
         var hash: Hash,
         var prevHash: Hash,
         @Id
-        var id: IssueId,
-        var projectId: ProjectId,
+        val id: IssueId,
+        val projectId: ProjectId,
         var status: String,
         var summary: String,
         var labels: List<String>,

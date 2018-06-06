@@ -11,7 +11,7 @@ data class TrackForeverProject(
         var hash: Hash,
         var prevHash: Hash,
         @Id
-        var id: ProjectId,
+        val id: ProjectId,
         var ownerName: String,
         var name: String,
         var description: String,
