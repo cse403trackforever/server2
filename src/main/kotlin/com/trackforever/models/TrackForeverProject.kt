@@ -13,5 +13,5 @@ data class TrackForeverProject(
         var name: String,
         var description: String,
         var source: String,
-        var issues: MutableMap<String, TrackForeverIssue>
+        var issues: MutableMap<String, TrackForeverIssue> = mutableMapOf()
 )

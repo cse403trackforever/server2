@@ -5,14 +5,13 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trackforever.Application
-import com.trackforever.repositories.ProjectRepository
 import com.trackforever.models.TrackForeverIssue
 import com.trackforever.models.TrackForeverProject
+import com.trackforever.repositories.ProjectRepository
 import com.trackforever.serializer.TrackForeverIssueSerializer
 import com.trackforever.serializer.TrackForeverProjectSerializer
 import org.bouncycastle.jcajce.provider.digest.SHA3
 import org.bouncycastle.util.encoders.Hex
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -25,8 +24,6 @@ typealias Hash = String
 @RestController
 class ProjectController (@Autowired private var projectRepository: ProjectRepository) {
 
-    private val logger = LoggerFactory.getLogger(Application::class.java)
-
     data class HashResponse(val project: String, val issues: Map<IssueId, String>)
 
     /**
@@ -37,7 +34,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/projects")
     fun getProjects(): ResponseEntity<List<TrackForeverProject>> {
-        logger.debug("get projects")
+        Application.logger.debug("get projects")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         return when {
             projectList.isEmpty() -> ResponseEntity(projectList, HttpStatus.OK)
@@ -53,7 +50,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/projects/{projectKey}")
     fun getProject(@PathVariable projectKey: ProjectId): ResponseEntity<TrackForeverProject> {
-        logger.debug("get project :: ($projectKey)")
+        Application.logger.debug("get project :: ($projectKey)")
         val specifiedProject = projectRepository.findById(projectKey)
         return if (specifiedProject.isPresent) ResponseEntity(specifiedProject.get(), HttpStatus.OK) else ResponseEntity(HttpStatus.GONE)
     }
@@ -66,7 +63,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/issues/{projectId}/{issueId}")
     fun getIssue(@PathVariable projectId: ProjectId, @PathVariable issueId: IssueId): ResponseEntity<TrackForeverIssue> {
-        logger.debug("get issues :: ($projectId, $issueId)")
+        Application.logger.debug("get issues :: ($projectId, $issueId)")
         val specifiedProject = projectRepository.findById(projectId)
         return when {
             specifiedProject.isPresent -> {
@@ -88,7 +85,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @GetMapping("/hashes")
     fun getHashes(): ResponseEntity<Map<ProjectId, HashResponse>> {
-        logger.debug("get hashes")
+        Application.logger.debug("get hashes")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
         if (projectList.isEmpty()) return ResponseEntity(emptyMap(), HttpStatus.OK)
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
@@ -107,7 +104,6 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
      * Expects a mapping of K-V pairs such that K = projectKey and V = List of Issues as a JSON String
      * Possible Responses: HTTP 200 OK with a map of all requested projects to their list of issues
      *                     HTTP 207 MULTI_STATUS with all projects that could be found mapped to their list of issues
-     *                     HTTP 410 GONE if none of the projects could be found.
      */
     @CrossOrigin
     @PutMapping("/issues")
@@ -116,7 +112,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
         // prevHash matches => update that issue for that project
         // prevHash doesn't match => ignore
         // Duplicate issue => ignore
-        logger.debug("set issues :: ($issues)")
+        Application.logger.debug("set issues :: ($issues)")
         val successes: MutableMap<ProjectId, MutableMap<IssueId, Hash>> = mutableMapOf()
         val mapper = jacksonObjectMapper()
         val content: Map<ProjectId, List<TrackForeverIssue>> = mapper.readValue(issues)
@@ -124,30 +120,31 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
             // Check if project exists
             val serverProject = projectRepository.findById(it.key)
             if (serverProject.isPresent) { // the project exists on the server
-                val serverIssues = serverProject.get().issues
+                val project = serverProject.get()
                 successes.putIfAbsent(it.key, mutableMapOf())
                 // Go through the given list and update those issues.
                 val givenIssues = it.value
                 givenIssues.forEach {
-                    if (serverIssues.containsKey(it.id)) { // Assumes IssueId never changes
-                        it.prevHash = serverIssues[it.id]!!.hash // Set prevHash to the one in the server
-                    }
-                    val calculatedHash = generateHash(it)
-                    if (calculatedHash != it.hash) {
-                        logger.debug("Mismatched issue hash detected.")
-                        logger.debug("Given hash: ${it.hash}")
-                        logger.debug("Expected hash: $calculatedHash")
-                        it.hash = calculatedHash
+                    if (project.issues.containsKey(it.id)) { // Assumes IssueId never changes
+                        it.prevHash = project.issues[it.id]!!.hash // Set prevHash to the one in the server
                     }
                     if (successes[it.projectId] == null) throw error("Issue: ${it.id} needs a valid projectId")
+
+                    // If updated issue, update hash
+                    val newHash = generateHash(it)
+                    if (newHash != it.hash) {
+                        it.prevHash = it.hash
+                        it.hash = generateHash(it)
+                    }
+
+                    // Add as success and update issue in project
                     successes[it.projectId]!![it.id] = it.hash
-                    serverIssues[it.id] = it
+                    project.issues[it.id] = it
                 }
                 projectRepository.save(serverProject.get())
             }
         }
         return when {
-            successes.isEmpty() -> ResponseEntity(HttpStatus.GONE)
             successes.keys.size == content.keys.size -> ResponseEntity(successes, HttpStatus.OK)
             else -> ResponseEntity(successes, HttpStatus.MULTI_STATUS)
         }
@@ -161,7 +158,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PutMapping("/projects")
     fun setProjects(@RequestBody projects: String): ResponseEntity<Map<ProjectId, Hash>> {
-        logger.debug("set projects :: ($projects)")
+        Application.logger.debug("set projects :: ($projects)")
         val mapper = jacksonObjectMapper()
         val content: List<TrackForeverProject> = mapper.readValue(projects)
         val successes: MutableMap<ProjectId, Hash> = mutableMapOf()
@@ -170,25 +167,20 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
             // Look in the database for the previous project
             val serverProject = projectRepository.findById(it.id)
             if (serverProject.isPresent) { // project with issue ID already exists.
-                it.prevHash = serverProject.get().hash // Set previous hash of the updated project to the one in the server.
+                val oldProject = serverProject.get()
+                it.issues = oldProject.issues
+
+                // If updated project, update hash
+                val newHash = generateHash(it)
+                if (newHash != it.hash) {
+                    it.prevHash = it.hash
+                    it.hash = generateHash(it)
+                }
+
                 projectRepository.deleteById(it.id) // Remove the old one.
             }
-            val calculatedHash = generateHash(it)
-            if (calculatedHash != it.hash) { // The calculated hash for the given project isn't correct
-                logger.debug("Mismatched project hash detected.")
-                logger.debug("Given hash: ${it.hash}")
-                logger.debug("Expected hash: $calculatedHash")
-                it.hash = calculatedHash
-            }
-            it.issues.forEach { // Correct the hashes for the given issues.
-                val calcIssueHash = generateHash(it.value)
-                if (calcIssueHash != it.value.hash) { // Fix hashes for issues
-                    logger.debug("Mismatched issue hash detected.")
-                    logger.debug("Given hash: ${it.value.hash}")
-                    logger.debug("Expected hash: $calcIssueHash")
-                    it.value.hash = calcIssueHash
-                }
-            }
+
+            // Update project and add to successes
             projectRepository.save(it)
             successes[it.id] = it.hash
         }
@@ -205,7 +197,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PostMapping("/issues")
     fun getRequestedIssues(@RequestBody issueIds: String): ResponseEntity<Map<ProjectId, List<TrackForeverIssue>>> {
-        logger.debug("get req issues :: ($issueIds)")
+        Application.logger.debug("get req issues :: ($issueIds)")
         val requestedIssues: MutableMap<ProjectId, MutableList<TrackForeverIssue>> = mutableMapOf()
         var partialFailure = false
         val mapper = jacksonObjectMapper()
@@ -244,7 +236,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
     @CrossOrigin
     @PostMapping("/projects")
     fun getRequestedProjects(@RequestBody projectIds: String): ResponseEntity<List<TrackForeverProject>> {
-        logger.debug("get req projects :: $projectIds")
+        Application.logger.debug("get req projects :: $projectIds")
         val requestedProjects: MutableList<TrackForeverProject> = mutableListOf()
         val mapper = jacksonObjectMapper()
         val content: List<ProjectId> = mapper.readValue(projectIds)
@@ -272,7 +264,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
                 module.addSerializer(TrackForeverProject::class.java, TrackForeverProjectSerializer())
                 mapper.registerModule(module)
                 val projectJson = mapper.writeValueAsString(jsonData)
-                logger.debug("Project JSON: $projectJson")
+                Application.logger.debug("Project JSON: $projectJson")
                 val crypto = SHA3.Digest512()
                 val projectByteArray = crypto.digest(projectJson.toByteArray())
                 return Hex.toHexString(projectByteArray)
@@ -282,7 +274,7 @@ class ProjectController (@Autowired private var projectRepository: ProjectReposi
                 module.addSerializer(TrackForeverIssue::class.java, TrackForeverIssueSerializer())
                 mapper.registerModule(module)
                 val issueJson = mapper.writeValueAsString(jsonData)
-                logger.debug("Issue JSON: $issueJson")
+                Application.logger.debug("Issue JSON: $issueJson")
                 val crypto = SHA3.Digest512()
                 val issueByteArray = crypto.digest(issueJson.toByteArray())
                 return Hex.toHexString(issueByteArray)

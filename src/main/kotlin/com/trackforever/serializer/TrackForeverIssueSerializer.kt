@@ -17,21 +17,15 @@ class TrackForeverIssueSerializer: StdSerializer<TrackForeverIssue>(TrackForever
         gen.writeObjectField("comments", value.comments)
         gen.writeStringField("submitterName", value.submitterName)
         gen.writeObjectField("assignees", value.assignees)
-        if (value.timeCreated != null) {
-            gen.writeNumberField("timeCreated", value.timeCreated!!)
-        } else {
-            gen.writeNumberField("timeCreated", null)
-        }
-        if (value.timeUpdated != null) {
-            gen.writeNumberField("timeUpdated", value.timeUpdated!!)
-        } else {
-            gen.writeNumberField("timeUpdated", null)
-        }
-        if (value.timeClosed != null) {
-            gen.writeNumberField("timeClosed", value.timeClosed!!)
-        } else {
-            gen.writeNumberField("timeClosed", null)
-        }
+
+        // Write nullable/optional long fields
+        val timeCreated = value.timeCreated
+        val timeUpdated = value.timeUpdated
+        val timeClosed = value.timeClosed
+        if (timeCreated != null) gen.writeNumberField("timeCreated", timeCreated) else gen.writeNullField("timeCreated")
+        if (timeUpdated != null) gen.writeNumberField("timeUpdated", timeUpdated) else gen.writeNumberField("timeUpdated", null)
+        if (timeClosed != null) gen.writeNumberField("timeClosed", timeClosed) else gen.writeNumberField("timeClosed", null)
+
         gen.writeEndObject()
     }
 

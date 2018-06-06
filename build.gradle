@@ -26,6 +26,7 @@ apply plugin: 'java'
 apply plugin: 'idea'
 apply plugin: 'io.spring.dependency-management'
 apply plugin: 'jacoco'
+apply plugin: 'application'
 
 // Configure jacoco
 jacocoTestReport {
@@ -40,6 +41,8 @@ coveralls {
     sourceDirs += ['src/main/kotlin']
 }
 
+mainClassName = 'com.trackforever.MainKt'
+
 // Java target version
 sourceCompatibility = 1.8
 group = 'com.trackforever'
@@ -48,6 +51,16 @@ version = '0.0.1-SNAPSHOT'
 repositories {
     jcenter()
     mavenCentral()
+}
+
+kapt {
+    useBuildCache = true
+}
+
+run {
+    if (project.hasProperty("clearAll")) {
+        args = ["clearAll"]
+    }
 }
 
 test {
