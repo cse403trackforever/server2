@@ -172,7 +172,7 @@ class ProjectController (
         content.forEach {
             // Look in the database for the previous project
             val serverProject = projectRepository.findById(it.id)
-            if (serverProject.isPresent) { // project with issue ID already exists.
+            if (serverProject.isPresent) { // project with project ID already exists.
                 val oldProject = serverProject.get()
                 it.issues = oldProject.issues
 
