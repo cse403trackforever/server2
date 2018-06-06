@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.trackforever.Application
+import com.trackforever.Hash
+import com.trackforever.IssueId
+import com.trackforever.ProjectId
 import com.trackforever.models.TrackForeverIssue
 import com.trackforever.models.TrackForeverProject
 import com.trackforever.repositories.IssueRepository
@@ -18,17 +21,13 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
-typealias ProjectId = String
-typealias IssueId = String
-typealias Hash = String
-
 @RestController
 class ProjectController (
         @Autowired private var projectRepository: ProjectRepository,
         @Autowired private var issueRepository: IssueRepository
 ) {
 
-    data class HashResponse(val project: String, val issues: Map<IssueId, String>)
+    data class HashResponse(val project: Hash, val issues: Map<IssueId, Hash>)
 
     /**
      * Gets all projects from the database.
@@ -94,7 +93,7 @@ class ProjectController (
         if (projectList.isEmpty()) return ResponseEntity(emptyMap(), HttpStatus.OK)
         val projectHashes: MutableMap<ProjectId, HashResponse> = mutableMapOf()
         projectList.forEach {
-            val issueHashes: MutableMap<IssueId, String> = mutableMapOf()
+            val issueHashes: MutableMap<IssueId, Hash> = mutableMapOf()
             it.issues.forEach {
                 issueHashes[it.key] = it.value.hash
             }
