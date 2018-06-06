@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.xml.ws.Response
 
 typealias ProjectId = String
 typealias IssueId = String
@@ -31,7 +32,7 @@ class ProjectController (
     data class HashResponse(val project: String, val issues: Map<IssueId, String>)
 
     /**
-     * Gets all projects from the database.
+     * Gets all projects along with all its issues from the database.
      * Possible Responses: HTTP 200 OK with a List of all projects.
      *                     HTTP 410 GONE if no projects exist in the database.
      */
@@ -40,6 +41,11 @@ class ProjectController (
     fun getProjects(): ResponseEntity<List<TrackForeverProject>> {
         Application.logger.debug("get projects")
         val projectList = ArrayList<TrackForeverProject>(projectRepository.findAll())
+        projectList.forEach {
+            val issues = issueRepository.findByProjectId(it.id)
+            val issuesMap = issues.associateBy({ it.id }, { it }).toMutableMap()
+            it.issues = issuesMap
+        }
         return when {
             projectList.isEmpty() -> ResponseEntity(projectList, HttpStatus.OK)
             else -> ResponseEntity(projectList, HttpStatus.OK)
@@ -56,7 +62,13 @@ class ProjectController (
     fun getProject(@PathVariable projectKey: ProjectId): ResponseEntity<TrackForeverProject> {
         Application.logger.debug("get project :: ($projectKey)")
         val specifiedProject = projectRepository.findById(projectKey)
-        return if (specifiedProject.isPresent) ResponseEntity(specifiedProject.get(), HttpStatus.OK) else ResponseEntity(HttpStatus.GONE)
+        if (!specifiedProject.isPresent) {
+            return ResponseEntity(HttpStatus.GONE)
+        }
+        val issues = issueRepository.findByProjectId(projectKey)
+        val project = specifiedProject.get()
+        project.issues = issues.associateBy({ it.id }, { it }).toMutableMap()
+        return ResponseEntity(project, HttpStatus.OK)
     }
 
     /**
