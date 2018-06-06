@@ -4,9 +4,11 @@ import com.trackforever.Hash
 import com.trackforever.IssueId
 import com.trackforever.ProjectId
 import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.index.CompoundIndex
 import org.springframework.data.mongodb.core.mapping.Document
 
 @Document(collection="issues")
+@CompoundIndex(name = "issue_key", def = "{'projectId' : 1, 'id': 1}")
 data class TrackForeverIssue(
         var hash: Hash,
         var prevHash: Hash,
