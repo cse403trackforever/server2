@@ -156,22 +156,6 @@ class ProjectController (
                     }
                     issueRepository.save(it) // Update the issue
                     successes[it.projectId]!![it.id] = it.hash
-
-                    if (project.issues.containsKey(it.id)) { // Assumes IssueId never changes
-                        it.prevHash = project.issues[it.id]!!.hash // Set prevHash to the one in the server
-                    }
-                    if (successes[it.projectId] == null) throw error("Issue: ${it.id} needs a valid projectId")
-
-                    // If updated issue, update hash
-                    val newHash = generateHash(it)
-                    if (newHash != it.hash) {
-                        it.prevHash = it.hash
-                        it.hash = generateHash(it)
-                    }
-
-                    // Add as success and update issue in project
-                    successes[it.projectId]!![it.id] = it.hash
-                    project.issues[it.id] = it
                 }
                 projectRepository.save(serverProject.get())
             }
