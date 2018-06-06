@@ -173,9 +173,6 @@ class ProjectController (
             // Look in the database for the previous project
             val serverProject = projectRepository.findById(it.id)
             if (serverProject.isPresent) { // project with project ID already exists.
-                val oldProject = serverProject.get()
-                it.issues = oldProject.issues
-
                 // If updated project, update hash
                 val newHash = generateHash(it)
                 if (newHash != it.hash) {
