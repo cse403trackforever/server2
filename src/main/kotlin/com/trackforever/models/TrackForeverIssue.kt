@@ -1,8 +1,13 @@
 package com.trackforever.models
 
+import org.springframework.data.annotation.Id
+import org.springframework.data.mongodb.core.mapping.Document
+
+@Document(collection="issues")
 data class TrackForeverIssue(
         var hash: String,
         var prevHash: String,
+        @Id
         var id: String,
         var projectId: String,
         var status: String,
