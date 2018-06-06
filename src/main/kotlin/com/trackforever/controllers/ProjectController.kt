@@ -209,10 +209,11 @@ class ProjectController (
         val mapper = jacksonObjectMapper()
         val content: Map<ProjectId, List<IssueId>> = mapper.readValue(issueIds)
         content.keys.forEach {
-            val specifiedProject = projectRepository.findById(it)
-            // Ensure project exists based on the projectKey
-            if (specifiedProject.isPresent) content[it]?.forEach { // Go through list of issueIds
-                val issue = specifiedProject.get().issues[it]
+            val specifiedIssues = issueRepository.findByProjectId(it)
+            val issues = specifiedIssues.associateBy({ it.id }, { it }).toMutableMap()
+            content[it]?.forEach {
+                // Go through list of issueIds
+                val issue = issues[it]
                 if (issue != null) { // Check to make sure the retrieved issue isn't null
                     requestedIssues.putIfAbsent(issue.projectId, mutableListOf())
                     val issuesList = requestedIssues[issue.projectId]
@@ -222,9 +223,6 @@ class ProjectController (
                 } else {
                     partialFailure = true
                 }
-            } else {
-                requestedIssues[it] = mutableListOf()
-                partialFailure = true
             }
         }
         return when {
@@ -249,7 +247,10 @@ class ProjectController (
         content.forEach {
             val specifiedProject = projectRepository.findById(it)
             if (specifiedProject.isPresent) {
-                requestedProjects += specifiedProject.get()
+                val issues = issueRepository.findByProjectId(it) // TODO: Check for possible exception
+                val project = specifiedProject.get()
+                project.issues = issues.associateBy({ it.id }, { it }).toMutableMap()
+                requestedProjects += project
             }
         }
         return when {
